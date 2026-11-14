@@ -1,0 +1,16 @@
+services:
+  web:
+    image: nginx:alpine
+    container_name: demo-nginx
+    restart: unless-stopped
+    ports:
+      # 左边是宿主机端口，被占用就改这里
+      - "8090:80"
+    volumes:
+      # 相对路径基于本 compose 文件所在目录，chroot 内是 /projects/nginx/
+      - ./html:/usr/share/nginx/html:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "2"

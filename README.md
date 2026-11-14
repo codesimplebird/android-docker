@@ -202,6 +202,25 @@ su -c "/data/docker/docker run --rm -v /sdcard/Download:/data alpine ls /data"
 
 ⚠️ **路径必须写成 chroot 内可见的**。因为 dockerd 和 CLI 都在 chroot 里，写宿主机的 `/storage/emulated/0` 会找不到。
 
+## 示例
+
+`examples/` 下有两个可以直接跑的最小项目：
+
+| 示例 | 验证什么 |
+|---|---|
+| **nginx** | 镜像能拉、端口能映射、volume 能挂、局域网能访问 |
+| **alpine-cron** | 容器能在后台长期跑、日志能查、日志不会吃满存储 |
+
+```bash
+su -c "cp -r examples/nginx /data/docker/projects/nginx"
+su -c "/data/docker/dc nginx up -d"
+# 浏览器打开 http://手机IP:8090
+```
+
+`alpine-cron` 的重点在日志配置那段——**手机上必须限制日志大小**，默认的 `json-file` 驱动不封顶，一个每 10 秒打一行的容器跑半年能吃掉 1GB+。
+
+详见 [examples/README.md](examples/README.md)。
+
 ## 已知限制
 
 | 限制 | 说明 |

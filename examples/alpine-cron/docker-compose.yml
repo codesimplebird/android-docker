@@ -1,0 +1,19 @@
+services:
+  ticker:
+    image: alpine:3.19
+    container_name: demo-ticker
+    restart: unless-stopped
+    # 每 10 秒打一行日志，用来验证「容器能在后台长期跑」。
+    # 用容器自身启动时刻算运行时长（/proc/uptime 在容器里看到的是宿主机的）。
+    # 注意 compose 里 $ 要双写（$$）才是字面量
+    command: >
+      sh -c 's=$$(date +%s); while true; do
+        printf "[%s] alive, running %ss\n" "$$(date +%H:%M:%S)" "$$(( $$(date +%s) - s ))";
+        sleep 10;
+      done'
+    # 手机存储有限，日志必须限制，否则几个月能吃掉几个 G
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "2"
