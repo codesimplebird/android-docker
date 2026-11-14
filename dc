@@ -1,0 +1,40 @@
+#!/system/bin/sh
+# compose 便捷入口：dc <项目名> <compose 命令...>
+#
+# 项目目录约定：/data/docker/projects/<项目名>/docker-compose.yml
+# （chroot 内对应 /projects/<项目名>/）
+#
+# 用法：
+#   dc demo up -d
+#   dc demo ps
+#   dc demo logs -f web
+#   dc demo restart
+#   dc demo down
+set -u
+
+D=/data/docker/docker
+
+if [ $# -lt 2 ]; then
+  echo "用法: dc <项目名> <compose 命令...>"
+  echo "示例: dc demo up -d"
+  echo ""
+  echo "现有项目："
+  for d in /data/docker/projects/*/; do
+    [ -f "$d/docker-compose.yml" ] && echo "  $(basename "$d")"
+  done
+  exit 1
+fi
+
+P=$1
+shift
+
+if [ ! -f "/data/docker/projects/$P/docker-compose.yml" ]; then
+  echo "错误: 找不到 /data/docker/projects/$P/docker-compose.yml" >&2
+  echo "可用的项目：" >&2
+  for d in /data/docker/projects/*/; do
+    [ -f "$d/docker-compose.yml" ] && echo "  $(basename "$d")" >&2
+  done
+  exit 1
+fi
+
+exec "$D" compose -f "/projects/$P/docker-compose.yml" "$@"

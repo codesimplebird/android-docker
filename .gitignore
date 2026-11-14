@@ -1,0 +1,27 @@
+# 运行时产物，不要提交
+*.log
+*.pid
+dockerd.log
+cgroup.log
+mounts.log
+net.log
+autostart.log
+
+# rootfs 和 Docker 数据（体积大，安装时下载）
+rootfs/
+bin/dockerd
+bin/containerd*
+bin/runc
+bin/docker
+bin/ctr
+bin/docker-proxy
+bin/docker-init
+lib/
+
+# 项目数据
+projects/
+
+# 编辑器
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,8 @@
+# 所有脚本必须是 LF，否则在 Android 上会因 shebang 带 \r 而报错
+* text=auto eol=lf
+
+*.sh   text eol=lf
+dc     text eol=lf
+docker text eol=lf
+*.json text eol=lf
+*.md   text eol=lf

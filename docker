@@ -1,0 +1,12 @@
+#!/system/bin/sh
+# 便捷入口：/data/docker/docker ps / run / images / compose ...
+#
+# ★ CLI 在 chroot 内运行，原因有两条：
+#   1) compose 插件是 Alpine 构建的 musl 动态二进制，Android 宿主没有
+#      /lib/ld-musl-aarch64.so.1，只有 chroot 里装了，必须在 chroot 内才能 exec
+#   2) dockerd 本身也在 chroot 内，CLI 与 daemon 的路径视图一致，
+#      -v 的源路径不会出现"客户端一个路径、服务端另一个路径"的错位
+#
+# 需要 root 运行：su -c '/data/docker/docker ps'
+export DOCKER_HOST=unix:///run/docker.sock
+exec /system/bin/chroot /data/docker/rootfs /usr/bin/docker "$@"
