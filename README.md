@@ -68,7 +68,39 @@ CONFIG_SECCOMP=y
 
 ## 安装
 
-### 1. 准备 rootfs
+### 一键安装（推荐）
+
+把仓库整个 push 到手机（或者 clone 下来），在仓库目录执行：
+
+```bash
+su -c "sh install.sh"
+```
+
+脚本会依次：检查 root 和内核 → 下载 Debian rootfs → 下载 Docker 静态二进制 → 部署脚本 → 装 compose 插件 → 启动并跑 hello-world 验证。
+
+**可选参数**（放在命令前面）：
+
+```bash
+# Docker 走官方源（默认阿里云）
+su -c "MIRROR=official sh install.sh"
+
+# rootfs 和 compose 走 GitHub 代理
+su -c "MIRROR=ghproxy sh install.sh"
+
+# 跳过 compose 插件
+su -c "SKIP_COMPOSE=1 sh install.sh"
+
+# 换安装目录
+su -c "DOCKER_ROOT=/data/dk sh install.sh"
+```
+
+脚本是幂等的，下载过的部分会跳过，可以重复执行。
+
+传文件到手机的方式：`adb push . /data/local/tmp/android-docker && adb shell "su -c 'cd /data/local/tmp/android-docker && sh install.sh'"`
+
+### 手动安装
+
+#### 1. 准备 rootfs
 
 Docker 需要一个可写的 Linux 根，Android 的 `/` 不行（只读且没有 `/run`）。
 用 Debian minirootfs：
@@ -80,7 +112,7 @@ su -c "cd /data/docker/rootfs && curl -LO https://github.com/debuerreotype/docke
 
 > 国内访问 GitHub 慢，可以换清华镜像或代理。
 
-### 2. 准备 Docker 静态二进制
+#### 2. 准备 Docker 静态二进制
 
 ```bash
 su -c "mkdir -p /data/docker/bin /data/docker/lib"
@@ -89,7 +121,7 @@ su -c "cd /tmp && curl -LO https://download.docker.com/linux/static/stable/aarch
 
 需要 `dockerd`、`containerd`、`containerd-shim-runc-v2`、`runc`、`docker`、`docker-proxy`、`docker-init`、`ctr`。
 
-### 3. 部署脚本
+#### 3. 部署脚本
 
 ```bash
 su -c "cp start.sh dockerd-ns.sh docker-cgroup.sh docker-mounts.sh docker-net.sh docker-net-watch.sh dc docker /data/docker/"
@@ -97,7 +129,7 @@ su -c "mkdir -p /data/docker/etc && cp daemon.json /data/docker/etc/"
 su -c "chmod +x /data/docker/*.sh /data/docker/dc /data/docker/docker"
 ```
 
-### 4. 启动
+#### 4. 启动
 
 ```bash
 su -c "/data/docker/start.sh"
@@ -109,7 +141,7 @@ su -c "/data/docker/start.sh"
 su -c "/data/docker/docker run --rm hello-world"
 ```
 
-### 5. 开机自启（可选）
+#### 5. 开机自启（可选）
 
 ```bash
 su -c "cat > /data/adb/service.d/docker.sh << 'EOF'
@@ -225,6 +257,8 @@ su -c "iptables -t nat -L POSTROUTING -n | head -5"
 ### 重启后全挂
 
 正常现象。Android 不保留 mount 和 iptables 规则，必须重跑 `start.sh`。用 `service.d` 自启。
+
+完整的排错手册见 **[docs/troubleshooting.md](docs/troubleshooting.md)** —— 按报错信息分类，附实际日志样本、诊断命令，以及提 issue 时该附上什么。
 
 ## 原理：为什么用 chroot 而不是 proot
 
