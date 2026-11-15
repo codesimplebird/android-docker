@@ -1,0 +1,63 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+
+      # 只报 error 级别（真正的语法/语义错误），
+      # 忽略 warning/info —— 这些脚本是给 Android 的 mksh/toybox 写的，
+      # 用 POSIX sh 规则会刷出大量误报。
+      - name: Check scripts
+        run: |
+          shellcheck --severity=error -s sh \
+            start.sh \
+            dockerd-ns.sh \
+            docker-cgroup.sh \
+            docker-mounts.sh \
+            docker-net.sh \
+            docker-net-watch.sh \
+            install.sh \
+            dc \
+            docker
+
+      # 所有脚本必须是 LF —— CRLF 会让 shebang 带上 \r，在 Android 上直接报错
+      - name: Check line endings
+        run: |
+          if grep -rlU $'\r' --include='*.sh' --include='dc' --include='docker' .; then
+            echo "::error::CRLF line endings found — scripts must be LF"
+            exit 1
+          fi
+          echo "All scripts are LF"
+
+      # compose 文件至少要是合法 YAML
+      - name: Validate YAML
+        run: |
+          pip install --quiet pyyaml
+          python3 - <<'PY'
+          import glob, sys, yaml
+          bad = []
+          for f in glob.glob('**/*.yml', recursive=True) + glob.glob('**/*.yaml', recursive=True):
+              if '.github' in f:
+                  continue
+              try:
+                  yaml.safe_load(open(f, encoding='utf-8'))
+              except Exception as e:
+                  bad.append(f'{f}: {e}')
+          if bad:
+              print('\n'.join(bad))
+              sys.exit(1)
+          print('All YAML files parse correctly')
+          PY

@@ -43,6 +43,11 @@ Android 内核其实完整具备容器所需的一切能力（namespace、cgroup
 
 ## 已验证设备
 
+![dashboard](docs/screenshot.png)
+
+*这套东西跑起来的样子 —— 三个服务在线、容器列表、UFS 寿命、实时网速。
+截图里的 IPv6、SSID、进程名已脱敏。*
+
 | 设备 | 代号 | SoC | 系统 | 内核 | 状态 |
 |---|---|---|---|---|---|
 | Xiaomi Mi 10 Pro | `cmi` | Snapdragon 865 | HyperOS 1.0 / Android 13 | 4.19.157-perf（自编译，2026-11-11） | **完整可用** |

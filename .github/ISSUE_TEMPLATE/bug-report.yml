@@ -1,0 +1,77 @@
+name: 问题报告
+description: 容器起不来、网络不通、端口映射失败等
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先看 [docs/troubleshooting.md](../blob/main/docs/troubleshooting.md) ——
+        常见报错基本都覆盖了。
+
+        **不带诊断信息的 issue 很难处理**，下面那一段请务必执行。
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 现象
+      description: 具体发生了什么，不要只写"跑不起来"
+      placeholder: |
+        执行 dc nginx up -d 后容器状态是 running，
+        但浏览器访问 http://手机IP:8090 超时。
+        netstat 里能看到 docker-proxy 在监听 8090。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. cp -r examples/nginx /data/docker/projects/nginx
+        2. /data/docker/dc nginx up -d
+        3. 浏览器访问 8090
+    validations:
+      required: true
+
+  - type: textarea
+    id: diag
+    attributes:
+      label: 诊断信息
+      description: |
+        在手机上执行下面这段，把生成的 `/sdcard/docker-diag.txt` 内容粘进来。
+        里面有设备信息、内核配置、dockerd 日志、cgroup 与网络规则状态。
+        请自行检查一遍，**删掉任何不想公开的内容**。
+      render: shell
+      placeholder: |
+        su -c "
+        echo '=== uname ==='; uname -a
+        echo '=== model ==='; getprop ro.product.model; getprop ro.build.version.release
+        echo '=== selinux ==='; getenforce
+        echo '=== kernel config ==='; zcat /proc/config.gz 2>/dev/null | grep -E 'CONFIG_(CGROUPS|NAMESPACES|VETH|OVERLAY_FS)='
+        echo '=== dockerd.log ==='; tail -30 /data/docker/dockerd.log
+        echo '=== cgroup.log ==='; cat /data/docker/cgroup.log
+        echo '=== net.log ==='; tail -25 /data/docker/net.log
+        echo '=== ip rule ==='; ip rule
+        echo '=== docker info ==='; /data/docker/docker info 2>&1 | head -30
+        " > /sdcard/docker-diag.txt
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 项目版本 / 最近一次提交
+      placeholder: 提交号或 "最新 main"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 已阅读 docs/troubleshooting.md
+          required: true
+        - label: 诊断信息已自行检查，不含隐私内容（IP、SSID、序列号等）
+          required: true

@@ -43,6 +43,11 @@ Plus two less obvious traps:
 
 ## Verified on
 
+![dashboard](docs/screenshot.png)
+
+*What it looks like when everything's running — services, containers, UFS wear, live throughput.
+IPv6, SSID and process names in the screenshot are masked.*
+
 | Device | Codename | SoC | OS | Kernel | Status |
 |---|---|---|---|---|---|
 | Xiaomi Mi 10 Pro | `cmi` | Snapdragon 865 | HyperOS 1.0 / Android 13 | 4.19.157-perf (self-built, 2026-11-11) | **Fully working** |

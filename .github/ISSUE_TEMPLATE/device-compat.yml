@@ -1,0 +1,107 @@
+name: 设备适配报告
+description: 报告你在某机型上跑通（或跑不通）的结果 —— 这是这个项目最需要的数据
+title: "[兼容性] "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提供适配数据。这个项目最缺的就是真实机型信息，
+        尤其是**原厂内核就能跑通**的案例 —— 说明厂商没有阉割 cgroup。
+
+        如果没跑通也请提交，失败信息同样有价值。
+
+  - type: input
+    id: model
+    attributes:
+      label: 机型
+      placeholder: 小米 10 Pro / OnePlus 9 / Pixel 6
+    validations:
+      required: true
+
+  - type: input
+    id: codename
+    attributes:
+      label: 设备代号
+      description: 运行 `adb shell getprop ro.product.device` 获取
+      placeholder: cmi
+    validations:
+      required: true
+
+  - type: input
+    id: soc
+    attributes:
+      label: SoC
+      placeholder: Snapdragon 865 / Dimensity 1200 / Exynos 2100
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: 系统与 Android 版本
+      placeholder: HyperOS 1.0 / Android 13
+    validations:
+      required: true
+
+  - type: input
+    id: kernel
+    attributes:
+      label: 内核版本
+      description: 运行 `adb shell uname -r` 获取
+      placeholder: 4.19.157-perf-g00f8d3a28662
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kernel_type
+    attributes:
+      label: 内核是原厂还是自编译
+      options:
+        - 原厂内核（未改动）
+        - 自编译（在原厂基础上补开了选项）
+        - 第三方内核（XDA / 酷安 / 其他）
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: 容器相关内核配置
+      description: 运行 `su -c "zcat /proc/config.gz | grep -E 'CONFIG_(CGROUPS|NAMESPACES|VETH|OVERLAY_FS)='"` 并粘贴输出
+      render: shell
+      placeholder: |
+        CONFIG_CGROUPS=y
+        CONFIG_NAMESPACES=y
+        CONFIG_VETH=y
+        CONFIG_OVERLAY_FS=y
+    validations:
+      required: true
+
+  - type: input
+    id: root
+    attributes:
+      label: root 方案
+      placeholder: Magisk 28.1 / KernelSU 0.9.5 / APatch
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: 结果
+      options:
+        - 完整可用（能跑容器、能联网、能映射端口）
+        - 部分可用（容器能起但有问题）
+        - 跑不通
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注
+      description: 遇到的问题、需要额外改的地方、cgroup v1/v2 等
+      placeholder: |
+        例如：cgroup 是 v1，docker-cgroup.sh 直接可用；
+        需要额外 modprobe veth；
+        端口映射正常但容器访问宿主机 IP 失败，等等。
