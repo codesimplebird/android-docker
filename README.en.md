@@ -93,7 +93,13 @@ CONFIG_IP_ADVANCED_ROUTER=y
 CONFIG_SECCOMP=y
 ```
 
-Stock kernels usually miss at least `CONFIG_CGROUPS` or `CONFIG_VETH`. See [docs/kernel.md](docs/kernel.md).
+Stock kernels usually miss at least `CONFIG_CGROUPS` or `CONFIG_VETH`. You'll need to build your own:
+
+- **[docs/kernel.en.md](docs/kernel.en.md)** — condensed English guide (step 0 through flashing)
+- **[docs/kernel.md](docs/kernel.md)** — full Chinese guide (vendor repos, clang matrix, fragment debugging, three packaging paths, unbricking)
+
+> **Read step 0 first.** A lot of devices don't need rebuilding at all — all four options
+> may already be `=y`.
 
 > If `/proc/config.gz` doesn't exist, `CONFIG_IKCONFIG_PROC` is off — you'll have to check the defconfig in the kernel source instead.
 

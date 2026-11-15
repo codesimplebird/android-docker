@@ -96,7 +96,14 @@ CONFIG_IP_ADVANCED_ROUTER=y
 CONFIG_SECCOMP=y
 ```
 
-原厂内核通常至少缺 `CONFIG_CGROUPS` 或 `CONFIG_VETH`。需要自己编译内核（见 [docs/kernel.md](docs/kernel.md)）。
+原厂内核通常至少缺 `CONFIG_CGROUPS` 或 `CONFIG_VETH`。需要自己编译内核。
+
+**完整的编译流程见 [docs/kernel.md](docs/kernel.md)** —— 包含：怎么判断你是否真的需要编、
+去哪找匹配的源码、clang 版本怎么选、**怎么备份原 boot 才救得回来**、
+选项被厂商 fragment 覆盖了怎么查、boot.img 打包的三种方案、以及变砖后的救法。
+
+> 动手前请先读第 0 步。**很多机型其实不用编** —— 四项配置本来就齐，
+> 直接跳过这一章装本项目即可。
 
 > `/proc/config.gz` 不存在的话，说明内核没开 `CONFIG_IKCONFIG_PROC`，只能从源码 defconfig 里查。
 
