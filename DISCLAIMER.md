@@ -1,5 +1,7 @@
 # 免责声明 / DISCLAIMER
 
+**简体中文** | [English](DISCLAIMER.en.md)
+
 **在继续之前请读完。这个项目会让你承担真实的风险。**
 
 ---

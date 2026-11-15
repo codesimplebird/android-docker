@@ -1,5 +1,7 @@
 # Android Docker
 
+[English](README.en.md) | **简体中文**
+
 在 root 过的 Android 手机上运行**真正的 Docker**——不是 proot 模拟、不是用户态假容器，是能跑标准镜像、能用 `docker compose`、能映射端口、容器能正常上网的那一套。
 
 > 唯一硬性前提：**内核要支持 namespace 和 cgroup**。很多机型的原厂内核阉割了这些选项，需要自编译。
@@ -37,6 +39,34 @@ Android 内核其实完整具备容器所需的一切能力（namespace、cgroup
 
 - **`tetherctrl_FORWARD` 末尾有无条件 DROP**（不开热点时链里只有这一条），所有转发包都会撞上。必须在 `FORWARD` 最前面抢先 ACCEPT。
 - **默认网关会随网络切换而变**，netd 重写自己的路由表时会把我们补的规则冲掉。所以有一个 30 秒轮询的看门狗。
+
+## 已验证设备
+
+| 设备 | 代号 | SoC | 系统 | 内核 | 状态 |
+|---|---|---|---|---|---|
+| Xiaomi Mi 10 Pro | `cmi` | Snapdragon 865 | HyperOS 1.0 / Android 13 | 4.19.157-perf（自编译，2026-11-11） | **完整可用** |
+
+测试环境：
+
+```
+架构      aarch64
+Root      Magisk 28.1
+Docker    24.0.9（静态二进制）
+SELinux   Permissive
+内核配置  CONFIG_NAMESPACES / CGROUPS / VETH / BRIDGE /
+          OVERLAY_FS / NETFILTER / IP_NF_NAT / IP_NF_FILTER /
+          IP_ADVANCED_ROUTER / SECCOMP  —— 全部 =y
+
+实测通过  docker run hello-world              OK
+          nginx:alpine + volume + :8090       OK（局域网可访问）
+          docker compose up -d                OK
+          容器出站网络                         OK
+          网关切换（WiFi 漫游）                 OK（看门狗自动重设规则）
+```
+
+> 在别的机型上跑通了？欢迎开 issue 说明型号、内核版本和
+> `zcat /proc/config.gz | grep CGROUP` 的结果。
+> **原厂内核能跑通尤其有价值**——说明厂商没有阉割 cgroup。
 
 ## 前置条件
 
@@ -328,7 +358,7 @@ su -c "iptables -t nat -L POSTROUTING -n | head -5"
 
 ## 免责声明
 
-**使用前请完整阅读 [DISCLAIMER.md](DISCLAIMER.md)。** 摘要：
+**使用前请完整阅读 [DISCLAIMER.md](DISCLAIMER.md)**（English: [DISCLAIMER.en.md](DISCLAIMER.en.md)）。摘要：
 
 | 风险 | 具体后果 |
 |---|---|
