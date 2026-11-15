@@ -37,6 +37,7 @@ echo ""
 
 [ "$(id -u)" = "0" ] || die "需要 root：su -c \"sh install.sh\""
 [ -x "$BB" ] || BB=$(command -v busybox 2>/dev/null) || die "找不到 busybox（Magisk 自带，检查 /data/adb/magisk/busybox）"
+command -v curl >/dev/null 2>&1 || die "找不到 curl，无法下载组件。Android 10+ 一般自带，旧系统请先装一个"
 
 ARCH=$(uname -m)
 case "$ARCH" in

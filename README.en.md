@@ -59,7 +59,7 @@ Kernel config  CONFIG_NAMESPACES / CGROUPS / VETH / BRIDGE /
                IP_ADVANCED_ROUTER / SECCOMP   — all =y
 
 Verified       docker run hello-world          OK
-               nginx:alpine + volume + :8090   OK (LAN reachable)
+               nginx:alpine + volume + port mapping   OK (LAN reachable, example uses 8090)
                docker compose up -d            OK
                container outbound networking   OK
                gateway switch (WiFi roaming)   OK (watchdog re-applies)
@@ -263,6 +263,36 @@ See [examples/README.md](examples/README.md).
 | **Does not survive reboot** | Mounts and iptables rules aren't persistent; `start.sh` must run again each boot |
 | **arm64 images only** | x86 images need qemu, which isn't viable performance-wise |
 | **Memory pressure** | Android's lmkd may kill containerd; keep container count low |
+
+## Uninstall and rollback
+
+```bash
+# 1. Stop and remove all containers
+su -c "for c in \$(/data/docker/docker ps -aq); do /data/docker/docker rm -f \$c; done"
+
+# 2. Stop the daemons
+su -c "pkill -f usr/bin/dockerd; pkill -f usr/bin/containerd"
+
+# 3. Restore SELinux to enforcing
+su -c "setenforce 1"
+su -c "getenforce"        # should print Enforcing
+
+# 4. Delete all data (irreversible — containers, images, config)
+su -c "rm -rf /data/docker"
+
+# 5. Remove autostart
+su -c "rm -f /data/adb/service.d/docker.sh"
+```
+
+Notes:
+
+- `setenforce 1` takes effect immediately, and **a reboot returns to Enforcing anyway**.
+- If you changed system properties (`setprop`) or wrote sepolicy rules for Docker, those
+  are **not** undone by the steps above — revert them separately.
+- Deleting `/data/docker` does **not** touch files your containers wrote into `/sdcard`;
+  those live in phone storage, not inside the Docker directory.
+- Kernel changes are **not** reverted. To go back to the stock kernel, flash the `boot.img`
+  you backed up in step 3 of the kernel guide.
 
 ## Troubleshooting
 

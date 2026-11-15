@@ -169,11 +169,13 @@ make ARCH=arm64 O=out \
   CROSS_COMPILE=aarch64-linux-gnu- \
   LLVM=1 LLVM_IAS=1 \
   -j$(nproc) \
-  Image.gz-dtb
+  Image.gz
 ```
 
-Target varies by SoC: `Image.gz-dtb` (Qualcomm), `Image`, `Image.gz`, occasionally
-`Image.lz4`. Check `out/arch/arm64/boot/` after building.
+Target varies by platform — `Image.gz` for sm8250 and later (Snapdragon 865/888, DTB lives
+in the separate dtbo partition), `Image.gz-dtb` for older SoCs (sdm845/660 and earlier),
+`Image`, occasionally `Image.lz4`. If you get `No rule to make target`, try the other one.
+Check `out/arch/arm64/boot/` after building.
 
 Build time: 15–40 minutes on 8 cores.
 
@@ -186,7 +188,7 @@ Build time: 15–40 minutes on 8 cores.
 ```bash
 mkdir work && cd work
 magiskboot unpack ../boot-backup.img     # extracts kernel / ramdisk.cpio / dtb
-cp ../kernel-source/out/arch/arm64/boot/Image.gz-dtb ./kernel
+cp ../kernel-source/out/arch/arm64/boot/Image.gz ./kernel   # match what you actually built
 magiskboot repack ../boot-backup.img ../boot-new.img
 ```
 
@@ -201,7 +203,7 @@ the ramdisk from your current boot and swaps only the kernel.
 ```bash
 git clone https://github.com/osm0sis/AnyKernel3
 cd AnyKernel3
-cp ../kernel-source/out/arch/arm64/boot/Image.gz-dtb ./
+cp ../kernel-source/out/arch/arm64/boot/Image.gz ./
 # edit anykernel.sh: device.name1=<codename>
 zip -r9 ../kernel-<codename>.zip * -x .git/*
 ```

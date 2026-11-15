@@ -244,7 +244,7 @@ make ARCH=arm64 O=out \
   LLVM=1 \
   LLVM_IAS=1 \
   -j$(nproc) \
-  Image.gz-dtb
+  Image.gz
 ```
 
 ### 参数说明
@@ -257,25 +257,26 @@ make ARCH=arm64 O=out \
 | `CROSS_COMPILE` | binutils 前缀（用于汇编器等） |
 | `LLVM=1` | 统一使用 LLVM 工具链（5.4+ 内核需要） |
 | `LLVM_IAS=1` | 用 clang 内置汇编器 |
-| `Image.gz-dtb` | 目标产物，多数高通机型需要这个 |
+| `Image.gz` | 目标产物，sm8250 及以后用这个 |
 
-### 目标产物因机型而异
+### 目标产物因平台而异
 
 | 产物 | 适用 |
 |---|---|
-| `Image.gz-dtb` | 高通机型（内核 + 设备树打包在一起） |
-| `Image` | 通用 arm64 |
-| `Image.gz` | 压缩内核 |
+| **`Image.gz`** | **sm8250 及以后（骁龙 865 / 888 等）。Android 10+ 的 DTB 独立放在 dtbo 分区** |
+| `Image.gz-dtb` | 老平台（sdm845 / sdm660 等），内核与 DTB 打包在一起 |
+| `Image` | 未压缩内核 |
 | `Image.lz4` | 部分三星 |
 
-不确定就先编 `Image.gz-dtb`，编完看 `out/arch/arm64/boot/` 下有什么。
+不确定就先编 `Image.gz`。如果报 `No rule to make target`，说明你的源码用的是另一种，
+换成 `Image.gz-dtb` 再试。编完看 `out/arch/arm64/boot/` 下实际生成了什么。
 
 ### 常见报错
 
 | 报错 | 原因 | 处理 |
 |---|---|---|
 | `clang: error: unknown argument` | clang 版本不匹配 | 换对应的 clang |
-| `No rule to make target 'Image.gz-dtb'` | 该机型不用 dtb 打包 | 改 `Image` 或 `Image.gz` |
+| `No rule to make target 'Image.gz'` | 产物名不匹配你的平台 | sm8250+ 用 `Image.gz`，老平台用 `Image.gz-dtb` |
 | `openssl/opensslv.h: No such file` | 缺开发库 | `apt install libssl-dev` |
 | `dtc: command not found` | 缺设备树编译器 | `apt install device-tree-compiler` |
 | `error: too many open files` | 文件描述符不够 | `ulimit -n 4096` |
@@ -301,7 +302,7 @@ mkdir work && cd work
 magiskboot unpack ../boot-backup.img      # 解出 kernel / ramdisk.cpio / dtb
 
 # 用新编的内核替换
-cp ../kernel-source/out/arch/arm64/boot/Image.gz-dtb ./kernel
+cp ../kernel-source/out/arch/arm64/boot/Image.gz ./kernel   # 产物名按上一步实际输出调整
 
 # 重新打包
 magiskboot repack ../boot-backup.img ../boot-new.img
@@ -329,7 +330,7 @@ magiskboot repack ../boot-backup.img ../boot-new.img
 ```bash
 git clone https://github.com/osm0sis/AnyKernel3
 cd AnyKernel3
-cp ../kernel-source/out/arch/arm64/boot/Image.gz-dtb ./
+cp ../kernel-source/out/arch/arm64/boot/Image.gz ./
 # 编辑 anykernel.sh，改 device.name1=<代号>
 zip -r9 ../kernel-<代号>-docker.zip * -x .git/*
 ```

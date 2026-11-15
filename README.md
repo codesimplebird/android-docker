@@ -59,7 +59,7 @@ SELinux   Permissive
           IP_ADVANCED_ROUTER / SECCOMP  —— 全部 =y
 
 实测通过  docker run hello-world              OK
-          nginx:alpine + volume + :8090       OK（局域网可访问）
+          nginx:alpine + volume + 端口映射    OK（局域网可访问，示例默认 8090）
           docker compose up -d                OK
           容器出站网络                         OK
           网关切换（WiFi 漫游）                 OK（看门狗自动重设规则）
@@ -162,7 +162,10 @@ su -c "mkdir -p /data/docker/rootfs"
 su -c "cd /data/docker/rootfs && curl -LO https://github.com/debuerreotype/docker-debian-artifacts/raw/dist-arm64v8/bookworm/rootfs.tar.xz && tar -xJf rootfs.tar.xz && rm rootfs.tar.xz"
 ```
 
-> 国内访问 GitHub 慢，可以换清华镜像或代理。
+> **如果 `tar -xJf` 报错**（Android 自带的 tar 未必支持 xz），改用：
+> `busybox xz -d rootfs.tar.xz && tar -xf rootfs.tar`
+>
+> 国内访问 GitHub 慢，可以换代理或用 `MIRROR=ghproxy sh install.sh`。
 
 #### 2. 准备 Docker 静态二进制
 
@@ -282,6 +285,33 @@ su -c "/data/docker/dc nginx up -d"
 | **重启后要重新启动** | 内核的 mount 和 iptables 规则都不持久，靠 `service.d` 重跑 `start.sh` |
 | **镜像兼容性** | 只能跑 arm64 镜像。x86 镜像需要 qemu 模拟，性能不可用 |
 | **内存吃紧** | Android 的 lmkd 可能杀掉 containerd，容器多时要注意 |
+
+## 卸载与恢复
+
+```bash
+# 1. 停掉并删除所有容器
+su -c "for c in \$(/data/docker/docker ps -aq); do /data/docker/docker rm -f \$c; done"
+
+# 2. 停止 dockerd 和 containerd
+su -c "pkill -f usr/bin/dockerd; pkill -f usr/bin/containerd"
+
+# 3. 恢复 SELinux 为强制模式
+su -c "setenforce 1"
+su -c "getenforce"        # 应显示 Enforcing
+
+# 4. 删除全部数据（不可逆，容器、镜像、配置都在里面）
+su -c "rm -rf /data/docker"
+
+# 5. 移除开机自启
+su -c "rm -f /data/adb/service.d/docker.sh"
+```
+
+**几点说明**：
+
+- `setenforce 1` 只是立即生效，**重启后系统本来就会回到 Enforcing**，不需要额外处理。
+- 如果曾为 Docker 改过系统属性（`setprop`）或写过 sepolicy，那些改动**不会被上面步骤还原**，需要单独撤销。
+- `/data/docker` 删除后，容器里映射到 `/sdcard` 的数据**不受影响**（它们本来就在手机存储里，不在 Docker 目录下）。
+- 内核改动**不会**因为卸载而还原。要用回原厂内核，需要刷回备份的 `boot.img`。
 
 ## 排错
 
