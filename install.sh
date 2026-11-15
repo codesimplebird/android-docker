@@ -24,6 +24,17 @@ warn(){ echo "  [!] $*"; }
 die() { echo ""; echo "[X] $*" >&2; exit 1; }
 
 # ---------------------------------------------------------------- 0. 检查
+echo "=========================================="
+echo " Android Docker 安装器"
+echo ""
+echo " 此操作需要 root，会关闭 SELinux 强制访问"
+echo " 控制，并以 root 身份运行容器。"
+echo ""
+echo " 可能导致：设备变砖、数据丢失、保修失效、"
+echo " 安全风险上升。详见 DISCLAIMER.md"
+echo "=========================================="
+echo ""
+
 [ "$(id -u)" = "0" ] || die "需要 root：su -c \"sh install.sh\""
 [ -x "$BB" ] || BB=$(command -v busybox 2>/dev/null) || die "找不到 busybox（Magisk 自带，检查 /data/adb/magisk/busybox）"
 

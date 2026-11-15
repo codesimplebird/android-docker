@@ -6,12 +6,35 @@
 
 ---
 
-## 1. Device risk
+## 1. Device risk: three kinds of "brick"
 
-- Flashing a custom kernel **can brick your device**. Recovery may require fastboot-restoring
-  the stock image, or — in the worst case — EDL / 9008 mode, which on some models means
-  opening the phone and shorting test points.
-- Unlocking the bootloader **erases all data** on the device and **may permanently void your warranty**.
+What people call "bricking" is actually three different outcomes with wildly different recovery costs:
+
+| Level | Symptom | Recoverable | Cost |
+|---|---|---|---|
+| **Soft brick** | Won't boot, but fastboot / recovery works | Yes | Restore the backup, minutes |
+| **Hard brick** | fastboot unreachable, only EDL / 9008 | Yes, but painful | License or disassembly, **all data lost** |
+| **Permanent damage** | Even EDL can't help | **No** | Motherboard replacement |
+
+### What causes permanent damage
+
+- **Flashing a kernel or firmware below your device's anti-rollback (ARB) version.**
+  Some Xiaomi, OPPO and Samsung devices keep an ARB counter — flashing lower burns an
+  eFuse, **irreversibly**. **Confirm your kernel version is ≥ the current system version
+  before flashing.**
+- Writing to the wrong partition table or into the bootloader partition.
+- Using sketchy third-party unlock services (scams, or worse — backdoors).
+
+### The reality of EDL / 9008
+
+- Xiaomi devices from 2020 on **require an authorized account** to enter 9008. Paid
+  third-party unlocks are unreliable.
+- Some models require **removing the back cover and shorting test points**.
+- Flashing in EDL **always wipes all data**.
+
+### Other device risks
+
+- Unlocking the bootloader **erases all data** and **may permanently void your warranty**.
 - OEM unlock policies change over time. After unlocking, OTA updates, payment app risk checks,
   and some system features (Find My Device, cloud services) may stop working.
 - A miscompiled or mispackaged kernel can break the **baseband, Wi-Fi, or camera**.
@@ -53,17 +76,95 @@
 
 ## 5. Legal and compliance
 
-- Unlocking the bootloader and rooting may **violate local regulations or carrier terms**
-  and can affect warranty and resale value.
-- This project is for **learning, research, and personal testing**. Follow the laws of your
-  jurisdiction.
-- **Do not** use this project to:
-  - operate on any device you do not own
-  - circumvent DRM or copyright protection
-  - run a public-facing commercial service without the required registration or licensing
-  - violate anyone's privacy or damage anyone's systems
+### 5.1 Warranty and ownership
 
-## 6. No warranty
+- Unlocking the bootloader typically **violates the manufacturer's warranty terms**. Even
+  after restoring the stock image, the unlock record often persists on vendor servers
+  (Xiaomi exposes an unlock-status API) and **can be used to deny service**.
+- Some jurisdictions (e.g. the U.S. Magnuson-Moss Warranty Act) prevent manufacturers from
+  voiding a warranty merely because the user repaired the device — but they may still deny
+  claims if the damage was caused by the user. **This does not apply everywhere**; in many
+  markets the vendor terms simply state "unlocking voids warranty".
+- Unlocking a carrier-locked device may **breach your carrier contract** and incur penalties.
+
+### 5.2 Liability as a service provider
+
+- If you expose services built on this project **to the public**, you become a service
+  provider and take on the associated obligations:
+  - In mainland China: Cybersecurity Law, Data Security Law, Personal Information
+    Protection Law; public-facing internet services generally also require ICP filing
+    and public security filing.
+  - Storing other people's data makes you a personal-information handler (notice, consent,
+    data minimisation, cross-border transfer restrictions).
+  - Do not use it to distribute illegal content, infringe copyright, or host gambling,
+    fraud, or adult platforms.
+- **Never expose SMB (445) or database ports to the internet.** If an intrusion exposes
+  other people's data, the operator is responsible.
+
+### 5.3 Technical protection measures
+
+- In some jurisdictions, bypassing the bootloader lock may be treated as circumventing a
+  technical protection measure (e.g. U.S. DMCA §1201 — exemptions exist, but the boundaries
+  are complicated).
+- This project **ships no unlock tools** and does not encourage bypassing vendor security.
+  You are responsible for confirming that unlocking your own device is lawful where you live.
+
+### 5.4 Resale and contractual constraints
+
+- When reselling an unlocked or rooted device you **must disclose it**. Concealment can
+  constitute fraud.
+- Some corporate purchase agreements, insurance policies, and lease contracts **prohibit
+  unlocked or rooted devices**; violating them may be a breach of contract.
+
+### 5.5 Corporate and institutional environments
+
+- Operating on a company-issued device may **violate your organisation's security policy**
+  and can trigger an internal audit.
+- Connecting to a corporate network (especially with container ports open) may violate
+  **network admission policies**.
+- Note that this project's security model (SELinux disabled, containers as root) **does not
+  satisfy most enterprise compliance frameworks** (ISO 27001, SOC 2, PCI DSS, and similar).
+
+### 5.6 Minors
+
+- Minors must have **guardian consent**. The guardian bears the consequences of a bricked
+  device or lost data.
+
+### 5.7 Prohibited uses
+
+**Do not** use this project to:
+
+- operate on any device you do not own
+- circumvent DRM or copyright protection
+- run a public-facing service without the required filings or licences
+- violate anyone's privacy or damage anyone's systems
+- mine cryptocurrency (phone compute is negligible and sustained load damages hardware)
+
+**This project is for learning, research, and personal testing. Follow the laws of your
+jurisdiction.**
+
+## 6. Open-source licence obligations (commonly missed)
+
+This project's own code is MIT, but **not everything it depends on is**:
+
+| Component | Licence | Your obligation |
+|---|---|---|
+| This project's scripts | MIT | Keep the copyright notice |
+| **Linux kernel** | **GPLv2** | **Distributing a modified build requires providing the complete corresponding source** |
+| Docker / containerd | Apache 2.0 | Keep NOTICE and licence files |
+| **Magisk** | **GPLv3** | Distributing a modified Magisk requires publishing the source |
+
+**The one people trip over**: if you compile a kernel following
+[docs/kernel.en.md](docs/kernel.en.md) and then share the resulting `boot.img`
+(on a forum, a cloud drive, a group chat), **you must also provide the modified kernel
+source** — or a written offer to supply it. **Shipping the binary alone violates GPLv2.**
+
+This is not hypothetical. Kernel developers have litigated GPL source obligations before,
+and "here's a build, no source" has been a long-standing problem in the ROM community.
+
+**Don't want that obligation? Use it on your own device only and don't distribute builds.**
+
+## 7. No warranty
 
 Provided under the **MIT License**, **without warranty of any kind**, express or implied,
 including but not limited to the warranties of merchantability, fitness for a particular

@@ -12,7 +12,9 @@ Run **real Docker** on a rooted Android phone — not proot emulation, not a use
 >
 > This project requires **unlocking the bootloader**, **flashing a custom kernel**, **disabling SELinux (`setenforce 0`)**, and running containers as root.
 >
-> That means you are signing up for: **a bricked device, wiped data, voided warranty, and a meaningfully weaker security posture**.
+> That means you are signing up for: **a bricked device (worst case: permanent damage,
+> motherboard replacement), wiped data, voided warranty, and a meaningfully weaker
+> security posture**.
 >
 > Use it on a **spare / test device only**. Do not do this on the phone that holds your accounts and photos.
 >
@@ -305,11 +307,12 @@ After `chroot` three problems remain (gaps 1, 3 and 5 in the table above) — th
 
 | Risk | Consequence |
 |---|---|
-| **Device** | A bad kernel flash can brick it; recovery may need EDL/9008. Unlocking wipes all data and may void warranty permanently |
+| **Device** | Three levels of brick: soft (restore backup), hard (EDL/9008, all data lost), **permanent (flashing below ARB burns an eFuse — motherboard replacement)**. Unlocking wipes data and may void warranty permanently |
 | **Data** | Containers share `/data` with the system — filling it breaks camera, app installs, even boot. No backup mechanism is provided |
 | **Security** | `setenforce 0` disables SELinux mandatory access control; containers run as root outside the Android sandbox |
 | **Hardware** | Continuous charging ages the battery; third-party batteries risk swelling; sustained heat can damage screen and board |
-| **Legal** | Unlocking/rooting may violate local law or carrier terms. Do not use on devices you don't own |
+| **Legal** | Unlocking/rooting may violate local law, carrier contracts, or corporate security policy; public services need filings; undisclosed resale can be fraud |
+| **Licensing** | Distributing a kernel `boot.img` you built **requires providing the source** (GPLv2); modified Magisk must be open-sourced (GPLv3) |
 
 **The authors and contributors accept no liability** for device damage, data loss, voided warranty, security incidents, legal disputes, or any direct or indirect damages.
 

@@ -9,6 +9,22 @@
 (XDA, Telegram groups, GitHub — search "`<device>` kernel cgroup"), use it.
 Compiling your own is the highest-risk path in this project.**
 
+> ## ⚠️ Before you start
+>
+> Kernel flashing has three failure modes with very different costs:
+>
+> | Outcome | Recoverable | Cost |
+> |---|---|---|
+> | Won't boot, fastboot works | Yes | Restore backup, minutes |
+> | fastboot gone, only EDL / 9008 | Yes | Licence or disassembly, **all data lost** |
+> | **Flashed below the ARB version** | **No** | **eFuse burned — motherboard replacement** |
+>
+> **Finish step 3 (back up your boot image) before step 7.** It's your only way back.
+>
+> Also: sharing the `boot.img` you build triggers **GPLv2 source obligations** —
+> see [DISCLAIMER.en.md](../DISCLAIMER.en.md) section 6. Shipping the binary alone
+> is a licence violation.
+
 ---
 
 ## Step 0: Find out whether you need to build at all
